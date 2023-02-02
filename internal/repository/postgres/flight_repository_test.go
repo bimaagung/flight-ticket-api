@@ -81,3 +81,62 @@ func Test_Add(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, payload.Id, id)
 }
+
+func Test_VerifyAvailable(t *testing.T) {
+	t.Run("should not error when flight number available", func(t *testing.T) {
+		// Arrange
+		id := "flight-123"
+
+		db, mock, err := sqlxmock.Newx()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+
+		defer db.Close()
+
+		rows := sqlxmock.NewRows([]string{"id"})
+
+		query := "SELECT (.+) FROM flights WHERE flight_number = \\?"
+		mock.ExpectQuery(query).WithArgs(id).WillReturnRows(rows)
+		flightRepository :=  flightPostgresRepository.NewFlightRepositoryPostgres(db)
+
+		// Action
+		err = flightRepository.VerifyAvailable(context.Background(), id)
+
+		// Asset
+		assert.NoError(t, err)
+	})
+
+	t.Run("should error when flight number not available", func(t *testing.T) {
+		// Arrange
+		id := "flight-123"
+
+		db, mock, err := sqlxmock.Newx()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+
+		defer db.Close()
+
+		mockFlight := []domain.Flight{
+			{
+				Id: "flight-123", CategoryId: "category-123", FlightNumber: "A-30J", Departure: "Bali", DepartureTime: time.Now().Local().String(), Arrive: "Jakarta", TimeArrive: time.Now().Local().String(), Seats: 158, Price: 1200000, CreatedAt: time.Now(), UpdatedAt: time.Now(), IsDeleted: false,
+			},
+		}
+
+
+		rows := sqlxmock.NewRows([]string{"id", "category_id", "flight_number", "departure", "departure_time", "arrive", "time_arrive", "seats", "price", "created_at", "updated_at", "is_deleted"}).
+		AddRow(mockFlight[0].Id, mockFlight[0].CategoryId, mockFlight[0].FlightNumber, mockFlight[0].Departure, mockFlight[0].DepartureTime, mockFlight[0].Arrive, mockFlight[0].TimeArrive, mockFlight[0].Seats, mockFlight[0].Price, mockFlight[0].CreatedAt, mockFlight[0].UpdatedAt, mockFlight[0].IsDeleted)
+	
+
+		query := "SELECT * FROM flights WHERE flight_number = \\?"
+		mock.ExpectQuery(query).WithArgs(id).WillReturnRows(rows)
+		flightRepository :=  flightPostgresRepository.NewFlightRepositoryPostgres(db)
+
+		// Action
+		err = flightRepository.VerifyAvailable(context.Background(), id)
+
+		// Asset
+		assert.Error(t, err, "flight not available")
+	})
+}

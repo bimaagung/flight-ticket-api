@@ -49,4 +49,5 @@ type FlightRes struct {
 type FlightRepository interface {
 	GetAll(c context.Context) ([]Flight, error)
 	Add(c context.Context, payload *Flight) (string, error)
+	VerifyAvailable(c context.Context, flightNumber string) error
 }

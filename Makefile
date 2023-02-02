@@ -11,3 +11,6 @@ migrate-up:
 
 migrate-down:
 	migrate -database "${DB}" -path db/migrations down
+
+test:
+	go test -v ./...
