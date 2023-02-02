@@ -26,3 +26,13 @@ func (f *flightPostgresRepository) GetAll(ctx context.Context)(result []domain.F
 
 	return result, nil
 }
+
+func (f *flightPostgresRepository) Add(ctx context.Context, payload *domain.Flight)(id string, err error) {
+	query := "INSERT INTO flights (id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id"
+	err = f.Conn.QueryRowxContext(ctx, query, payload.Id, payload.CategoryId, payload.FlightNumber, payload.Departure, payload.Arrive, payload.TimeArrive, payload.Seats, payload.Price).Scan(&id)
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
+}

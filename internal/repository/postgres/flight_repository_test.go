@@ -11,7 +11,7 @@ import (
 	sqlxmock "github.com/zhashkevych/go-sqlxmock"
 )
 
-func TestGetAll(t *testing.T) {
+func Test_GetAll(t *testing.T) {
 	// Arrange
 	db, mock, err := sqlxmock.Newx()
 	if err != nil {
@@ -45,4 +45,39 @@ func TestGetAll(t *testing.T) {
 	assert.Len(t, list, 2)
 	assert.Equal(t, list[0].Id, mockFlight[0].Id)
 	assert.Equal(t, list[1].Id, mockFlight[1].Id)
+}
+
+func Test_Add(t *testing.T) {
+	// Arrange
+	payload := &domain.Flight{
+		Id: "flight-123",
+		CategoryId: "category-123",
+		FlightNumber: "A-30J",
+		Departure: "Bali",
+		DepartureTime: time.Now().Local().String(),
+		Arrive: "Jakarta",
+		TimeArrive: time.Now().Local().String(),
+		Seats: 10,
+		Price: 1500000,
+	}
+
+	db, mock, err := sqlxmock.Newx()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	rows := sqlxmock.NewRows([]string{"id"}).AddRow(payload.Id)
+
+	query := "INSERT INTO flights"
+	mock.ExpectQuery(query).WithArgs(payload.Id, payload.CategoryId, payload.FlightNumber, payload.Departure, payload.Arrive, payload.TimeArrive, payload.Seats, payload.Price).WillReturnRows(rows)
+	flightRepository :=  flightPostgresRepository.NewFlightRepositoryPostgres(db)
+
+	// Action
+	id, err := flightRepository.Add(context.Background(), payload)
+
+	// Asset
+	assert.NoError(t, err)
+	assert.Equal(t, payload.Id, id)
 }
