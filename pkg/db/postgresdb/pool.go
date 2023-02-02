@@ -1,19 +1,19 @@
 package postgresdb
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 var counts int64
 
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dsn)
+func openDB(dsn string) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func openDB(dsn string) (*sql.DB, error) {
 
 }
 
-func NewPostgresDB() *sql.DB {
+func NewPostgresDB() *sqlx.DB {
 
 	
 	var (
