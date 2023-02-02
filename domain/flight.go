@@ -6,18 +6,18 @@ import (
 )
 
 type Flight struct {
-	Id             string
-	CategoryId    string
-	FlightNumber  string
-	Departure      string
-	DepartureTime string
-	Arrive         string
-	TimeArrive    string
-	Seats          int
-	Price          int
-	CreatedAt     time.Time
-	UpdatedAt time.Time
-	IsDeleted bool
+	Id             	string 		`db:"id"`	
+	CategoryId    	string 		`db:"category_id"`
+	FlightNumber  	string 		`db:"flight_number"`
+	Departure      	string 		`db:"departure"`
+	DepartureTime 	string 		`db:"departure_time"`
+	Arrive         	string 		`db:"arrive"`
+	TimeArrive    	string 		`db:"time_arrive"`
+	Seats          	int			`db:"seats"`
+	Price          	int			`db:"price"`
+	CreatedAt     	time.Time	`db:"created_at"`
+	UpdatedAt 	  	time.Time	`db:"updated_at"`
+	IsDeleted 		bool		`db:"is_deleted"`
 }
 
 type FlightReq struct {
@@ -47,6 +47,5 @@ type FlightRes struct {
 }
 
 type FlightRepository interface {
-	AddFlight(c context.Context, f Flight) (*Flight, error)
-	VerifyAvailableFlight(c context.Context, id string) (string, error)
+	GetAll(c context.Context) ([]Flight, error)
 }
